@@ -1,0 +1,6 @@
+{
+  "name": "시간대별 친환경 전기 사용 알리미",
+  "description": "시간대별 탄소배출계수, 신재생에너지 비중, 전기요금을 한눈에 비교하고 가전제품의 최적 친환경 사용 시간을 추천하는 모바일 우선 에너지 알리미",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
