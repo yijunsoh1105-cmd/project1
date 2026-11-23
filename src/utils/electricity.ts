@@ -217,23 +217,48 @@ export function parseElectricityCsv(csvText: string): CsvParseResult {
   const records: HourlyElectricityRecord[] = [];
 
   for (let i = startRow; i < lines.length; i += 1) {
-    const cols = lines[i].split(',').map((c) => c.trim());
-    if (cols.length < 4) {
+    const rawCols = lines[i].split(',').map((c) =>
+      c
+        .trim()
+        .replace(/^"(.*)"$/, '$1')
+        .trim(),
+    );
+    if (rawCols.length < 4) {
       return {
         ok: false,
         error: `${i + 1}번째 줄에 열이 4개 미만입니다. (시간, 탄소배출, 신재생비율, 전기요금)`,
       };
     }
 
-    const hour = Number(cols[hourIdx]);
-    const carbonGPerKwh = Number(cols[carbonIdx]);
-    const renewablePct = Number(cols[renewableIdx]);
-    const tariffKrwPerKwh = Number(cols[tariffIdx]);
+    const rawHour = rawCols[hourIdx]
+      .replace(/시$/, '')
+      .replace(/^(\d{1,2}):00$/, '$1')
+      .trim();
+    const rawCarbon = rawCols[carbonIdx];
+    const rawRenewable = rawCols[renewableIdx].replace(/%$/, '').trim();
+    const rawTariff = rawCols[tariffIdx].replace(/원$/, '').trim();
+
+    if (
+      rawHour === '' ||
+      rawCarbon === '' ||
+      rawRenewable === '' ||
+      rawTariff === ''
+    ) {
+      return {
+        ok: false,
+        error: `${i + 1}번째 줄에 빈 값이 있습니다.`,
+      };
+    }
+
+    const hour = Number(rawHour);
+    const carbonGPerKwh = Number(rawCarbon);
+    const renewablePct = Number(rawRenewable);
+    const tariffKrwPerKwh = Number(rawTariff);
 
     if (!Number.isInteger(hour) || hour < 0 || hour > 23) {
       return {
         ok: false,
-        error: `${i + 1}번째 줄의 시간("${cols[hourIdx]}")은 0~23 사이의 정수여야 합니다.`,
+        error: `${i + 1}번째 줄의 시간("${rawCols[hourIdx]}")은 0~23 사이의 정수여야 합니다.`,
       };
     }
 
@@ -245,12 +270,12 @@ export function parseElectricityCsv(csvText: string): CsvParseResult {
     }
 
     if (
-      Number.isNaN(carbonGPerKwh) ||
+      !Number.isFinite(carbonGPerKwh) ||
       carbonGPerKwh < 0 ||
-      Number.isNaN(renewablePct) ||
+      !Number.isFinite(renewablePct) ||
       renewablePct < 0 ||
       renewablePct > 100 ||
-      Number.isNaN(tariffKrwPerKwh) ||
+      !Number.isFinite(tariffKrwPerKwh) ||
       tariffKrwPerKwh < 0
     ) {
       return {

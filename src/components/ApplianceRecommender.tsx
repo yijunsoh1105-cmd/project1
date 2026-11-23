@@ -43,10 +43,22 @@ function formatSignedKrw(amount: number): string {
   return '0원 (동일)';
 }
 
+function formatFormulaNumber(value: number): string {
+  const rounded = Math.round(value * 100) / 100;
+  return rounded.toLocaleString('ko-KR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+}
+
 function formatFormulaKrw(amount: number): string {
-  const rounded = Math.round(amount);
-  if (rounded < 0) return `-${Math.abs(rounded).toLocaleString('ko-KR')}원`;
-  return `${rounded.toLocaleString('ko-KR')}원`;
+  const rounded = Math.round(amount * 10) / 10;
+  const formatted = Math.abs(rounded).toLocaleString('ko-KR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 1,
+  });
+  if (rounded < 0) return `-${formatted}원`;
+  return `${formatted}원`;
 }
 
 export function ApplianceRecommender({
@@ -263,7 +275,7 @@ export function ApplianceRecommender({
             type="button"
             aria-expanded={showFormula}
             onClick={() => setShowFormula((prev) => !prev)}
-            className="mt-3 pt-2.5 border-t border-emerald-200/80 w-full min-h-[36px] flex items-center justify-between text-xs font-semibold text-emerald-900 hover:text-emerald-700 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 rounded"
+            className="mt-3 pt-2.5 border-t border-emerald-200/80 w-full min-h-[44px] flex items-center justify-between text-xs font-semibold text-emerald-900 hover:text-emerald-700 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 rounded"
           >
             <span>계산 방법 보기</span>
             <ChevronDown
@@ -288,14 +300,14 @@ export function ApplianceRecommender({
                 </div>
                 <div className="mt-0.5 font-mono-tabular text-slate-900">
                   {appliance.powerKw}kW × {appliance.durationHours}h × (
-                  {usualWindow.avgCarbonGPerKwh.toFixed(1)} −{' '}
-                  {bestCarbonWindow.avgCarbonGPerKwh.toFixed(1)})g/kWh ={' '}
+                  {formatFormulaNumber(usualWindow.avgCarbonGPerKwh)} −{' '}
+                  {formatFormulaNumber(bestCarbonWindow.avgCarbonGPerKwh)})g/kWh ={' '}
                   <strong>
-                    {Math.round(carbonSavedOnceG).toLocaleString('ko-KR')}g
+                    {formatFormulaNumber(carbonSavedOnceG)}g
                   </strong>
                 </div>
                 <div className="font-mono-tabular text-slate-700">
-                  한 달(30회): {Math.round(carbonSavedOnceG).toLocaleString('ko-KR')}g × 30 ={' '}
+                  한 달(30회): {formatFormulaNumber(carbonSavedOnceG)}g × 30 ={' '}
                   <strong>{formatCarbonAmount(carbonSavedMonthlyG)}</strong>
                 </div>
               </div>
@@ -309,8 +321,8 @@ export function ApplianceRecommender({
                 </div>
                 <div className="mt-0.5 font-mono-tabular text-slate-900">
                   {appliance.powerKw}kW × {appliance.durationHours}h × (
-                  {usualWindow.avgTariffKrwPerKwh.toFixed(1)} −{' '}
-                  {bestCarbonWindow.avgTariffKrwPerKwh.toFixed(1)})원/kWh ={' '}
+                  {formatFormulaNumber(usualWindow.avgTariffKrwPerKwh)} −{' '}
+                  {formatFormulaNumber(bestCarbonWindow.avgTariffKrwPerKwh)})원/kWh ={' '}
                   <strong>{formatFormulaKrw(costSavedOnceKrw)}</strong>
                 </div>
                 <div className="font-mono-tabular text-slate-700">

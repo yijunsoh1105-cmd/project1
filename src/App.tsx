@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { ApplianceRecommender } from './components/ApplianceRecommender';
 import { BottomTabBar, MobileTab } from './components/BottomTabBar';
 import { CurrentStatusBanner } from './components/CurrentStatusBanner';
@@ -27,7 +27,9 @@ function getInitialData(): HourlyElectricityRecord[] {
 }
 
 export default function App() {
-  const realCurrentHour = new Date().getHours();
+  const [realCurrentHour, setRealCurrentHour] = useState<number>(() =>
+    new Date().getHours(),
+  );
 
   const [data, setData] = useState<HourlyElectricityRecord[]>(() => {
     try {
@@ -91,6 +93,19 @@ export default function App() {
       cancelled = true;
     };
   }, [isCustomCsv]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      const nextHour = new Date().getHours();
+      setRealCurrentHour((prev) => {
+        if (prev !== nextHour) {
+          setCurrentHour((curr) => (curr === prev ? nextHour : curr));
+        }
+        return nextHour;
+      });
+    }, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const thresholds = useMemo(() => computeCarbonThresholds(data), [data]);
 
@@ -227,8 +242,26 @@ export default function App() {
       });
   };
 
+  const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleUploadCsvFile(file);
+    }
+    e.target.value = '';
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-24 lg:pb-12">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv,text/csv"
+        onChange={handleFileInputChange}
+        className="sr-only"
+        id="csv-file-upload"
+        aria-hidden="true"
+        tabIndex={-1}
+      />
       <TopBar
         onNavigateSection={handleNavigateSection}
         onTriggerCsvUpload={handleTriggerCsvUpload}
@@ -319,8 +352,7 @@ export default function App() {
             isCustomCsv={isCustomCsv}
             dataSourceLabel={dataSourceLabel}
             csvError={csvError}
-            fileInputRef={fileInputRef}
-            onUploadCsvFile={handleUploadCsvFile}
+            onOpenFilePicker={() => fileInputRef.current?.click()}
             onDownloadCsv={handleDownloadCsv}
             onResetCsv={handleResetCsv}
             onSelectHour={(hour) => {

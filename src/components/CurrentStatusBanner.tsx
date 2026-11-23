@@ -87,7 +87,7 @@ export function CurrentStatusBanner({
             id="hour-simulator"
             value={currentHour}
             onChange={(e) => onChangeHour(Number(e.target.value))}
-            className="min-h-[36px] px-2.5 py-1 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 cursor-pointer tabular-nums"
+            className="min-h-[44px] sm:min-h-[38px] px-2.5 py-1 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 cursor-pointer tabular-nums"
           >
             {Array.from({ length: 24 }, (_, h) => (
               <option key={h} value={h}>
@@ -101,7 +101,7 @@ export function CurrentStatusBanner({
             <button
               type="button"
               onClick={onResetToRealHour}
-              className="inline-flex items-center gap-1 min-h-[36px] px-2.5 py-1 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-100 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+              className="inline-flex items-center gap-1 min-h-[44px] sm:min-h-[38px] px-2.5 py-1 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-100 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
             >
               <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
               <span>현재 시각</span>

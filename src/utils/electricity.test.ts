@@ -117,3 +117,28 @@ test('recommendAppliance recommends lowest avgCarbonGPerKwh window and computes 
   assert.equal(Math.round(rec.costSavedOnceKrw), 812);
   assert.equal(Math.round(rec.costSavedMonthlyKrw), 812 * 30);
 });
+
+test('parseElectricityCsv handles quoted fields and hour labels while rejecting empty cells', () => {
+  const quotedCsv = [
+    'hour,carbon_g_per_kwh,renewable_pct,tariff_krw_per_kwh',
+    ...Array.from(
+      { length: 24 },
+      (_, h) => `"${String(h).padStart(2, '0')}:00","${300 + h}","${10 + h}%","${120 + h}원"`,
+    ),
+  ].join('\n');
+  const okRes = parseElectricityCsv(quotedCsv);
+  assert.equal(okRes.ok, true);
+  if (okRes.ok) {
+    assert.equal(okRes.data[0].hour, 0);
+    assert.equal(okRes.data[23].tariffKrwPerKwh, 143);
+  }
+
+  const emptyCellCsv = [
+    'hour,carbon_g_per_kwh,renewable_pct,tariff_krw_per_kwh',
+    '0,,5.0,100',
+    ...Array.from({ length: 23 }, (_, i) => `${i + 1},400,5.0,100`),
+  ].join('\n');
+  const emptyRes = parseElectricityCsv(emptyCellCsv);
+  assert.equal(emptyRes.ok, false);
+});
+
